@@ -1,8 +1,8 @@
 # face-recognition
 
 
-`$ conda create --name <env> --file requirements.txt
+`conda create --name <env> --file requirements.txt`
 
-`conda activate <env>
+`conda activate <env>`
 
-`python main.py
+`python main.py`
