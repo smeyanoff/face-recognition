@@ -22,8 +22,8 @@ mtcnn = mtcnn.MTCNN(
 if __name__ == '__main__':
 
     photo_path = "data/dima/"
-    photo1 = cv2.imread(photo_path+"photo1.jpg")
-    photo2 = cv2.imread(photo_path+"photo2.jpg", cv2.IMREAD_GRAYSCALE) 
+    photo1 = cv2.imread(photo_path+"photo2.jpg")
+    photo2 = cv2.imread(photo_path+"photo3.jpg", cv2.IMREAD_GRAYSCALE) 
 
     photo1 = cv2.cvtColor(photo1, cv2.COLOR_BGR2RGB)
     photo2 = cv2.cvtColor(photo2, cv2.COLOR_BGR2RGB)
@@ -40,7 +40,7 @@ if __name__ == '__main__':
     cropped_photo1 = torch.from_numpy(photo1[
         start_point[1]:end_point[1],    #y1:y2
         start_point[0]:end_point[0]     #x1:x2
-    ])
+    ]).permute(2, 0, 1).unsqueeze(0).float().to(config.DEVICE)
 
      # Draw the face detection annotations on the image.
     photo2 = cv2.cvtColor(photo2, cv2.COLOR_RGB2BGR)
@@ -55,7 +55,7 @@ if __name__ == '__main__':
     cropped_photo2 = torch.from_numpy(photo2[
         start_point[1]:end_point[1],    #y1:y2
         start_point[0]:end_point[0]     #x1:x2
-    ])
+    ]).permute(2, 0, 1).unsqueeze(0).float().to(config.DEVICE)
 
     with torch.no_grad():
         embanding1 = res_net.forward(cropped_photo1)
