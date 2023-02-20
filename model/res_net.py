@@ -4,21 +4,27 @@ import torch
 from torch import nn
 from torch.nn import functional as F
 
+from config import config
+
+config = config.Config()
+
 
 class BasicConv2d(nn.Module):
-
     def __init__(self, in_planes, out_planes, kernel_size, stride, padding=0):
         super().__init__()
         self.conv = nn.Conv2d(
-            in_planes, out_planes,
-            kernel_size=kernel_size, stride=stride,
-            padding=padding, bias=False
-        ) # verify bias false
+            in_planes,
+            out_planes,
+            kernel_size=kernel_size,
+            stride=stride,
+            padding=padding,
+            bias=False,
+        )  # verify bias false
         self.bn = nn.BatchNorm2d(
             out_planes,
-            eps=0.001, # value found in tensorflow
-            momentum=0.1, # default pytorch value
-            affine=True
+            eps=0.001,  # value found in tensorflow
+            momentum=0.1,  # default pytorch value
+            affine=True,
         )
         self.relu = nn.ReLU(inplace=False)
 
@@ -30,7 +36,6 @@ class BasicConv2d(nn.Module):
 
 
 class Block35(nn.Module):
-
     def __init__(self, scale=1.0):
         super().__init__()
 
@@ -40,13 +45,13 @@ class Block35(nn.Module):
 
         self.branch1 = nn.Sequential(
             BasicConv2d(256, 32, kernel_size=1, stride=1),
-            BasicConv2d(32, 32, kernel_size=3, stride=1, padding=1)
+            BasicConv2d(32, 32, kernel_size=3, stride=1, padding=1),
         )
 
         self.branch2 = nn.Sequential(
             BasicConv2d(256, 32, kernel_size=1, stride=1),
             BasicConv2d(32, 32, kernel_size=3, stride=1, padding=1),
-            BasicConv2d(32, 32, kernel_size=3, stride=1, padding=1)
+            BasicConv2d(32, 32, kernel_size=3, stride=1, padding=1),
         )
 
         self.conv2d = nn.Conv2d(96, 256, kernel_size=1, stride=1)
@@ -64,7 +69,6 @@ class Block35(nn.Module):
 
 
 class Block17(nn.Module):
-
     def __init__(self, scale=1.0):
         super().__init__()
 
@@ -74,8 +78,8 @@ class Block17(nn.Module):
 
         self.branch1 = nn.Sequential(
             BasicConv2d(896, 128, kernel_size=1, stride=1),
-            BasicConv2d(128, 128, kernel_size=(1,7), stride=1, padding=(0,3)),
-            BasicConv2d(128, 128, kernel_size=(7,1), stride=1, padding=(3,0))
+            BasicConv2d(128, 128, kernel_size=(1, 7), stride=1, padding=(0, 3)),
+            BasicConv2d(128, 128, kernel_size=(7, 1), stride=1, padding=(3, 0)),
         )
 
         self.conv2d = nn.Conv2d(256, 896, kernel_size=1, stride=1)
@@ -92,7 +96,6 @@ class Block17(nn.Module):
 
 
 class Block8(nn.Module):
-
     def __init__(self, scale=1.0, noReLU=False):
         super().__init__()
 
@@ -103,8 +106,8 @@ class Block8(nn.Module):
 
         self.branch1 = nn.Sequential(
             BasicConv2d(1792, 192, kernel_size=1, stride=1),
-            BasicConv2d(192, 192, kernel_size=(1,3), stride=1, padding=(0,1)),
-            BasicConv2d(192, 192, kernel_size=(3,1), stride=1, padding=(1,0))
+            BasicConv2d(192, 192, kernel_size=(1, 3), stride=1, padding=(0, 1)),
+            BasicConv2d(192, 192, kernel_size=(3, 1), stride=1, padding=(1, 0)),
         )
 
         self.conv2d = nn.Conv2d(384, 1792, kernel_size=1, stride=1)
@@ -123,7 +126,6 @@ class Block8(nn.Module):
 
 
 class Mixed_6a(nn.Module):
-
     def __init__(self):
         super().__init__()
 
@@ -132,7 +134,7 @@ class Mixed_6a(nn.Module):
         self.branch1 = nn.Sequential(
             BasicConv2d(256, 192, kernel_size=1, stride=1),
             BasicConv2d(192, 192, kernel_size=3, stride=1, padding=1),
-            BasicConv2d(192, 256, kernel_size=3, stride=2)
+            BasicConv2d(192, 256, kernel_size=3, stride=2),
         )
 
         self.branch2 = nn.MaxPool2d(3, stride=2)
@@ -146,24 +148,23 @@ class Mixed_6a(nn.Module):
 
 
 class Mixed_7a(nn.Module):
-
     def __init__(self):
         super().__init__()
 
         self.branch0 = nn.Sequential(
             BasicConv2d(896, 256, kernel_size=1, stride=1),
-            BasicConv2d(256, 384, kernel_size=3, stride=2)
+            BasicConv2d(256, 384, kernel_size=3, stride=2),
         )
 
         self.branch1 = nn.Sequential(
             BasicConv2d(896, 256, kernel_size=1, stride=1),
-            BasicConv2d(256, 256, kernel_size=3, stride=2)
+            BasicConv2d(256, 256, kernel_size=3, stride=2),
         )
 
         self.branch2 = nn.Sequential(
             BasicConv2d(896, 256, kernel_size=1, stride=1),
             BasicConv2d(256, 256, kernel_size=3, stride=1, padding=1),
-            BasicConv2d(256, 256, kernel_size=3, stride=2)
+            BasicConv2d(256, 256, kernel_size=3, stride=2),
         )
 
         self.branch3 = nn.MaxPool2d(3, stride=2)
@@ -195,13 +196,8 @@ class InceptionResnetV1(nn.Module):
             initialized. (default: {None})
         dropout_prob {float} -- Dropout probability. (default: {0.6})
     """
-    def __init__(
-        self, 
-        pretrained=None, 
-        dropout_prob=0.6, 
-        device=None
-    ):
 
+    def __init__(self, pretrained=None, dropout_prob=0.6):
         super().__init__()
 
         # Set simple attributes
@@ -252,11 +248,6 @@ class InceptionResnetV1(nn.Module):
         if pretrained is not None:
             load_weights(self, pretrained)
 
-        self.device = torch.device('cpu')
-        if device is not None:
-            self.device = device
-            self.to(device)
-
     def forward(self, x):
         """Calculate embeddings or probabilities given a batch of input image tensors.
 
@@ -287,9 +278,9 @@ class InceptionResnetV1(nn.Module):
 
         return x
 
+
 def load_weights(mdl, name):
-    
-    cached_file = 'model/weights/vggface2-features.pt'
+    cached_file = config.RES_NET_MODEL
     state_dict = {}
     state_dict.update(torch.load(cached_file))
     mdl.load_state_dict(state_dict)

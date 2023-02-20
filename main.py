@@ -1,64 +1,125 @@
-import torchvision
+import os
+import pickle
+
 import torch
-import cv2
+import numpy as np
+from tqdm import tqdm
 
 from config.config import Config
-from model import res_net, mtcnn
+from model import mtcnn, res_net
+from utils import utils
 
 config = Config()
+np.random.seed(1)
 
-res_net = res_net.InceptionResnetV1(
-        pretrained = True,
-        dropout_prob=0.6, 
-        device=config.DEVICE
-    )
-res_net.eval().to(config.DEVICE)
-
-mtcnn = mtcnn.MTCNN(
-    keep_all=True, 
-    device=config.DEVICE
+res_net = (
+    res_net.InceptionResnetV1(pretrained=True, dropout_prob=0.6)
+    .eval()
+    .to(config.DEVICE)
 )
 
-if __name__ == '__main__':
+mtcnn = (
+    mtcnn.MTCNN(keep_all=True)
+    .eval()
+    .to(config.DEVICE)
+)
 
-    photo_path = "data/dima/"
-    photo1 = cv2.imread(photo_path+"photo2.jpg")
-    photo2 = cv2.imread(photo_path+"photo3.jpg", cv2.IMREAD_GRAYSCALE) 
+# extract photos for each person in data folders
+photo_path = config.DATA_PATH
+choose_photos = utils.ChoosePersons(
+    photo_path,
+    persons_size=25,
+    photo_size=15
+)
 
-    photo1 = cv2.cvtColor(photo1, cv2.COLOR_BGR2RGB)
-    photo2 = cv2.cvtColor(photo2, cv2.COLOR_BGR2RGB)
+if __name__ == "__main__":
 
-    # Draw the face detection annotations on the image.
-    photo1 = cv2.cvtColor(photo1, cv2.COLOR_RGB2BGR)
-    boxes1, _ = mtcnn.detect(photo1)
-    
-    # represents the top left corner of rectangle
-    start_point = (int(boxes1[0][0]), int(boxes1[0][1]))
-    # represents the bottom right corner of rectangle
-    end_point = (int(boxes1[0][2]), int(boxes1[0][3]))
+    results = {}
+    for epoche in tqdm(range(10000)):
+        
+        person1_photo_path, person2_photo_path = (
+            choose_photos.random_choose_person_photos()
+        )
+        
+        # it doesn't make sense to compare the same photos
+        if person1_photo_path == person2_photo_path:
+            continue
+        
+        # read and crop photos
+        person1_photo = utils.read_photo(
+            person1_photo_path
+        )
+        try:
+            cropped_photo1 = utils.cropp_photo(
+                person1_photo, 
+                mtcnn
+            )
+        except TypeError:
+            cropped_photo1 = "face not recognized"
 
-    cropped_photo1 = torch.from_numpy(photo1[
-        start_point[1]:end_point[1],    #y1:y2
-        start_point[0]:end_point[0]     #x1:x2
-    ]).permute(2, 0, 1).unsqueeze(0).float().to(config.DEVICE)
+        person2_photo = utils.read_photo(
+            person2_photo_path
+        )
+        try:
+            cropped_photo2 = utils.cropp_photo(
+                person2_photo, 
+                mtcnn
+            )
+        except TypeError:
+            cropped_photo2 = "face not recognized"
 
-     # Draw the face detection annotations on the image.
-    photo2 = cv2.cvtColor(photo2, cv2.COLOR_RGB2BGR)
-    
-    boxes2, _ = mtcnn.detect(photo2)
-    
-    # represents the top left corner of rectangle
-    start_point = (int(boxes2[0][0]), int(boxes2[0][1]))
-    # represents the bottom right corner of rectangle
-    end_point = (int(boxes2[0][2]), int(boxes2[0][3]))
-    
-    cropped_photo2 = torch.from_numpy(photo2[
-        start_point[1]:end_point[1],    #y1:y2
-        start_point[0]:end_point[0]     #x1:x2
-    ]).permute(2, 0, 1).unsqueeze(0).float().to(config.DEVICE)
+        if (
+            cropped_photo1 == "face not recognized" 
+            or cropped_photo2 == "face not recognized"
+        ):
+            results[epoche] = {
+                "person_1": person1,
+                "person_1_photo": photo1,
+                "person_2": person2,
+                "person_2_photo": photo2,
+                "results": "face not recognized",
+                "froad": froad
+            }
 
-    with torch.no_grad():
-        embanding1 = res_net.forward(cropped_photo1)
-        embanding2 = res_net.forward(cropped_photo2)                                              
+        # compute embandings
+        with torch.no_grad():
+            try:
+                embanding1 = res_net.forward(cropped_photo1)
+                embanding2 = res_net.forward(cropped_photo2)
+            except RuntimeError:
+                results[epoche] = {
+                    "person_1": person1,
+                    "person_1_photo": photo1,
+                    "person_2": person2,
+                    "person_2_photo": photo2,
+                    "results": "RuntimeError",
+                    "froad": froad
+                }
+                continue
+            except TypeError:
+                results[epoche] = {
+                    "person_1": person1,
+                    "person_1_photo": photo1,
+                    "person_2": person2,
+                    "person_2_photo": photo2,
+                    "results": "TypeError",
+                    "froad": froad
+                }
+                continue
+        results[epoche] = {
+                "person_1": person1,
+                "person_1_photo": photo1,
+                "person_2": person2,
+                "person_2_photo": photo2,
+                "results": {
+                    "euclidean": (
+                        torch.cdist(embanding1, embanding2)     #compute distances
+                        .numpy(force=True)[0][0]
+                    )
+                },
+                "froad": froad
+            }
 
-    print(torch.cdist(embanding1, embanding2))
+    # save the experiment results to file
+    with open('data/experiments/res_net_mtcnn_vgg__exp1.pkl', 'wb') as f:
+        pickle.dump(results, f)
