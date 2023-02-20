@@ -8,7 +8,7 @@ import torch
 from config import config
 
 config = config.Config()
-
+np.random.seed(1)
 
 def read_photo(photo_path: str):
     photo = cv2.imread(photo_path)

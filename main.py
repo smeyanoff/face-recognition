@@ -10,7 +10,6 @@ from model import mtcnn, res_net
 from utils import utils
 
 config = Config()
-np.random.seed(1)
 
 res_net = (
     res_net.InceptionResnetV1(pretrained=True, dropout_prob=0.6)
