@@ -34,7 +34,7 @@ At first you need to add photos to data directory. Photos need to have next stru
 | ---- ...
 | ---- personK_photoL
 ```
-Then you need to change <DATA_PATH> to your photo_folder_name parametr in folder `config` / `config.py` file. 
+Then you need to change <DATA_PATH> to your photo_folder_name parameter in folder `config` / `config.py` file. 
 ```
 python3 -m venv .venv_facerec - python3.8 has been used
 source .venv_facerec/bin/activate - for linux
