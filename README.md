@@ -14,6 +14,7 @@ You can have a look on the [notebook](https://github.com/smeyanoff/face-recognit
 
 # Fast start
 At first you need to add photos to data directory. Photos need to have next structure:
+```
 | - data
 | -- photo_folder_name
 | --- person1
@@ -32,12 +33,12 @@ At first you need to add photos to data directory. Photos need to have next stru
 | ---- personK_photo2
 | ---- ...
 | ---- personK_photoL
-
-Then you need to change <DATA_PATH> to your photo_folder_name parametr in folder <config> / <config.py> file. 
-
-`python3 -m venv .venv_facerec` - python3.8 has been used
-`source .venv_facerec/bin/activate` - for linux
-`pip install -r requirements.txt`
-`python main.py`
-  
- Script main.py will compute euclidean distance of two photo embandings into <data> / <experimets> folder.
+```
+Then you need to change <DATA_PATH> to your photo_folder_name parametr in folder `config` / `config.py` file. 
+```
+python3 -m venv .venv_facerec - python3.8 has been used
+source .venv_facerec/bin/activate - for linux
+pip install -r requirements.txt
+python main.py
+ ```
+ Script main.py will compute euclidean distance of two photo embandings into `data` / `experimets` folder.
