@@ -1,9 +1,9 @@
 import os
 from typing import List
 
-import cv2
+# import cv2
 import numpy as np
-import torch
+# import torch
 
 from config import config
 
@@ -11,34 +11,34 @@ config = config.Config()
 np.random.seed(1)
 
 
-def read_photo(photo_path: str):
-    photo = cv2.imread(photo_path)
-    # photo = cv2.cvtColor(photo, cv2.COLOR_BGR2RGB)
+# def read_photo(photo_path: str):
+#     photo = cv2.imread(photo_path)
+#     # photo = cv2.cvtColor(photo, cv2.COLOR_BGR2RGB)
 
-    return photo
+#     return photo
 
 
-# TODO() описать переменные функций
-def cropp_photo(photo: np.ndarray, face_detect_model) -> torch.tensor:
-    boxes, _ = face_detect_model.detect(photo)
+# # TODO() описать переменные функций
+# def cropp_photo(photo: np.ndarray, face_detect_model) -> torch.tensor:
+#     boxes, _ = face_detect_model.detect(photo)
 
-    start_point = (int(boxes[0][0]), int(boxes[0][1]))
-    end_point = (int(boxes[0][2]), int(boxes[0][3]))
+#     start_point = (int(boxes[0][0]), int(boxes[0][1]))
+#     end_point = (int(boxes[0][2]), int(boxes[0][3]))
 
-    cropped_photo = (
-        torch.from_numpy(
-            photo[
-                start_point[1] : end_point[1],  # y1:y2
-                start_point[0] : end_point[0],  # x1:x2
-            ]
-        )
-        .permute(2, 0, 1)
-        .unsqueeze(0)
-        .float()
-        .to(config.DEVICE)
-    )
+#     cropped_photo = (
+#         torch.from_numpy(
+#             photo[
+#                 start_point[1] : end_point[1],  # y1:y2
+#                 start_point[0] : end_point[0],  # x1:x2
+#             ]
+#         )
+#         .permute(2, 0, 1)
+#         .unsqueeze(0)
+#         .float()
+#         .to(config.DEVICE)
+#     )
 
-    return cropped_photo
+#     return cropped_photo
 
 
 class ChoosePersons:
@@ -98,4 +98,4 @@ class ChoosePersons:
         person1_photo_path = os.path.join(person1_path, photo1)
         person2_photo_path = os.path.join(person2_path, photo2)
 
-        return person1_photo_path, person2_photo_path
+        return person1, person2, photo1, photo2, person1_photo_path, person2_photo_path, froad

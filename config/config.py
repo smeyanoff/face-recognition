@@ -1,6 +1,6 @@
 import os
 
-import torch
+# import torch
 
 
 class Config(object):
@@ -9,11 +9,11 @@ class Config(object):
     ONET_MODEL = os.path.normpath("model/weights/onet.pt")
     PNET_MODEL = os.path.normpath("model/weights/pnet.pt")
     RNET_MODEL = os.path.normpath("model/weights/rnet.pt")
-    DATA_PATH = os.path.normpath("data/vgg_face2_batch")
+    DATA_PATH = os.path.normpath("data/data")
     FROAD_PROBA = 0.36
 
-    # TODO() разобраться с памятью
-    if torch.cuda.is_available():
-        DEVICE = "cuda"
-    else:
-        DEVICE = "cpu"
+    # # TODO() разобраться с памятью
+    # if torch.cuda.is_available():
+    #     DEVICE = "cuda"
+    # else:
+    #     DEVICE = "cpu"
